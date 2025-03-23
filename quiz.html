@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Quiz Container -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 m-4">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">Interactive Quiz</h1>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress" class="bg-blue-500 rounded-full h-2" style="width: 0%"></div>
+                </div>
+                <div class="text-sm text-gray-600 mt-2">Question <span id="current">1</span> of 5</div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="question-container" class="space-y-6">
+                <!-- Question 1 -->
+                <div class="question" data-number="1">
+                    <div class="text-lg font-semibold text-gray-700 mb-4">
+                        What is the capital of France?
+                    </div>
+                    <div class="grid gap-3">
+                        <button class="option bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg transition-all duration-200">
+                            Paris
+                        </button>
+                        <button class="option bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg transition-all duration-200">
+                            London
+                        </button>
+                        <button class="option bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg transition-all duration-200">
+                            Berlin
+                        </button>
+                        <button class="option bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg transition-all duration-200">
+                            Madrid
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback and Next Button -->
+            <div id="feedback" class="mt-8 hidden">
+                <div id="message" class="text-center text-lg font-medium"></div>
+                <button id="next" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                    Next Question
+                </button>
+            </div>
+
+            <!-- Score -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 text-center text-gray-600">
+                <span class="font-medium">Score:</span>
+                <span id="score" class="ml-2">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Madrid"],
+                correct: 0
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1
+            },
+            {
+                question: "What is the largest mammal in the world?",
+                options: ["African Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+                correct: 1
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+                correct: 2
+            },
+            {
+                question: "What is the chemical symbol for gold?",
+                options: ["Ag", "Fe", "Au", "Cu"],
+                correct: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', () => answerSelected(option));
+        });
+
+        document.getElementById('next').addEventListener('click', () => nextQuestion());
+
+        function displayQuestion() {
+            const questionContainer = document.getElementById('question-container');
+            questionContainer.innerHTML = `
+                <div class="text-lg font-semibold text-gray-700 mb-4">
+                    ${questions[currentQuestion].question}
+                </div>
+                <div class="grid gap-3">
+                    ${questions[currentQuestion].options.map((option, index) => `
+                        <button class="option bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg transition-all duration-200">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', () => answerSelected(option));
+            });
+            updateProgress();
+            document.getElementById('feedback').classList.add('hidden');
+        }
+
+        function answerSelected(option) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.disabled = true);
+            
+            const index = Array.from(options).indexOf(option);
+            const correct = index === questions[currentQuestion].correct;
+            
+            option.classList.add(correct ? 'bg-green-100' : 'bg-red-100');
+            document.getElementById('message').textContent = correct ? 
+                'Correct! Well done!' : 
+                `Sorry, the correct answer was ${questions[currentQuestion].options[questions[currentQuestion].correct]}`;
+            
+            if (correct) score++;
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('feedback').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                displayQuestion();
+            } else {
+                // Show final results
+                document.getElementById('question-container').innerHTML = `
+                    <h2 class="text-2xl font-bold text-center mb-4">Quiz Complete!</h2>
+                    <p class="text-center text-lg">Your final score is ${score} out of ${questions.length}</p>
+                `;
+                document.getElementById('feedback').classList.add('hidden');
+                document.getElementById('progress').style.width = '100%';
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            document.getElementById('current').textContent = currentQuestion + 1;
+        }
+
+        // Initialize the quiz
+        displayQuestion();
+    </script>
+</body>
+</html>
